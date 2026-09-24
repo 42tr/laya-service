@@ -12,8 +12,11 @@ docker run --rm -p 8000:8000 \
   laya-service
 ```
 
-首次启动会从 Hugging Face 下载 checkpoint（公开模型，无需账号），用 named
-volume 缓存避免重复下载。
+首次启动会从 Hugging Face 下载 checkpoint（公开模型，无需账号）。镜像默认在
+**构建时**预下载权重（GitHub Actions 网络可访问 HF)，运行时以
+`HF_HUB_OFFLINE=1` 离线启动，无需外网。如希望运行时下载，构建时加
+`--build-arg PRELOAD_MODELS=0` 并设置 `-e HF_HUB_OFFLINE=0`；国内环境可搭配
+`-e HF_ENDPOINT=https://hf-mirror.com`。
 
 调用示例：
 
@@ -32,6 +35,8 @@ curl -X POST http://localhost:8000/v1/systemone \
 | `LAYA_MODELS` | 上游默认 | 路由模型，如 `auto`、`english` |
 | `LAYA_PRELOAD` | `1` | 启动时预加载 checkpoint |
 | `LAYA_API_KEY` | 未设置 | 设置后启用 Bearer 鉴权 |
+| `HF_HUB_OFFLINE` | `1` | `0` 时允许运行时下载 checkpoint |
+| `HF_ENDPOINT` | 未设置 | HF 被墙时设为 `https://hf-mirror.com` |
 | `HF_TOKEN` | 未设置 | 拉取 gated checkpoint 时使用 |
 | `OMP_NUM_THREADS` | `4` | CPU 线程数 |
 
